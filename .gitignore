@@ -1,0 +1,33 @@
+# Gradle:
+gradlew
+gradlew.bat
+gradle
+.gradle
+gradle-app.setting
+!gradle-wrapper.jar
+.gradletasknamecache
+
+# Mongo Explorer plugin:
+*.iws
+
+# macOS
+.DS_Store
+
+# IntelliJ
+.idea
+/out/
+.idea_modules/
+/build/
+
+# JIRA plugin
+atlassian-ide-plugin.xml
+
+# Crashlytics plugin (for Android Studio and IntelliJ)
+com_crashlytics_export_strings.xml
+crashlytics.properties
+crashlytics-build.properties
+fabric.properties
+
+# # Work around https://youtrack.jetbrains.com/issue/IDEA-116898
+# gradle/wrapper/gradle-wrapper.properties
+
