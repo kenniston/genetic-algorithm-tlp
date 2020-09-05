@@ -4,9 +4,14 @@ import br.com.dynamiclight.genetic.app.Styles
 import tornadofx.*
 
 class MainView : View("Genetic Algorithm") {
-    override val root = hbox {
-        label(title) {
-            addClass(Styles.heading)
-        }
+    override val root = borderpane {
+        left<MainLeftView>()
+        center<MainDrawView>()
+    }
+}
+
+class BottomView: View() {
+    override val root = label("Bottom View") {
+        addClass(Styles.heading)
     }
 }

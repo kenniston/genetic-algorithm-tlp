@@ -1,14 +1,14 @@
 package br.com.dynamiclight.genetic.app
 
+import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
-import tornadofx.Stylesheet
-import tornadofx.box
-import tornadofx.cssclass
-import tornadofx.px
+import tornadofx.*
 
 class Styles : Stylesheet() {
     companion object {
         val heading by cssclass()
+        val subtitle by cssclass()
+        val paintArea by cssclass()
     }
 
     init {
@@ -16,6 +16,14 @@ class Styles : Stylesheet() {
             padding = box(10.px)
             fontSize = 62.px
             fontWeight = FontWeight.BOLD
+        }
+
+        subtitle {
+            fontSize = 20.px
+        }
+
+        paintArea {
+            backgroundColor += Color.LIGHTGRAY
         }
     }
 }
