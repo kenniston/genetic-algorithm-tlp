@@ -8,6 +8,8 @@ import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
 import javafx.util.Duration
 import tornadofx.*
+import kotlin.math.pow
+import kotlin.math.sqrt
 import kotlin.random.Random
 
 class MainDrawView : View("Drawer") {
@@ -21,6 +23,9 @@ class MainDrawView : View("Drawer") {
 
     private fun addPoint(evt: MouseEvent) {
         val pt = root.sceneToLocal(evt.sceneX, evt.sceneY)
+
+        if (isNearToPoint(pt.x, pt.y)) return
+
         val c = Color.rgb(Random.nextInt(255), Random.nextInt(255), Random.nextInt(255))
         val circle = Circle(pt.x, pt.y, pointRadius, c)
         val ripple = Circle(pt.x, pt.y, pointRadius, c)
@@ -40,6 +45,17 @@ class MainDrawView : View("Drawer") {
 
         root.add(ripple)
         root.add(circle)
+        viewModel.addPoint(circle)
+    }
+
+    private fun isNearToPoint(x: Double, y: Double): Boolean {
+        viewModel.item.points.forEach {
+            val distance = sqrt((it.x - x).pow(2.0) + (it.y - y).pow(2.0))
+            if (distance <= pointRadius * 2) {
+                return true
+            }
+        }
+        return false
     }
 
 }

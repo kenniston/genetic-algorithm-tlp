@@ -8,7 +8,7 @@ import javafx.geometry.Pos
 import javafx.scene.chart.CategoryAxis
 import javafx.scene.chart.NumberAxis
 import javafx.scene.control.TextFormatter
-import javafx.scene.paint.Color
+import javafx.stage.FileChooser
 import tornadofx.*
 import java.text.DecimalFormatSymbols
 
@@ -67,7 +67,7 @@ class MainLeftView : View("Parameters") {
                             }
 
                             label("Evolutions: 00") {
-                                vboxConstraints { marginTop = 20.0 }
+                                vboxConstraints { marginTop = 38.0 }
                                 addClass(Styles.subtitle)
                             }
                             label("Shortest Distance: 00") { addClass(Styles.subtitle) }
@@ -97,7 +97,7 @@ class MainLeftView : View("Parameters") {
                             }
 
                             button("Create Population") {
-                                vboxConstraints { marginTop = 15.0 }
+                                vboxConstraints { marginTop = 5.0 }
                                 minWidth = 138.0
                                 minHeight = 50.0
                                 action {
@@ -106,7 +106,7 @@ class MainLeftView : View("Parameters") {
                             }
 
                             button("Run / Stop") {
-                                vboxConstraints { marginTop = 10.0 }
+                                vboxConstraints { marginTop = 5.0 }
                                 minWidth = 138.0
                                 minHeight = 50.0
                                 action {
@@ -115,7 +115,7 @@ class MainLeftView : View("Parameters") {
                             }
 
                             button("Clear") {
-                                vboxConstraints { marginTop = 10.0 }
+                                vboxConstraints { marginTop = 5.0 }
                                 minWidth = 138.0
                                 minHeight = 50.0
                                 action {
@@ -123,6 +123,27 @@ class MainLeftView : View("Parameters") {
                                 }
                             }
 
+                            button("Save") {
+                                vboxConstraints { marginTop = 15.0 }
+                                minWidth = 138.0
+                                minHeight = 50.0
+                                action {
+                                    val fileChooser = FileChooser()
+                                    val file = fileChooser.showSaveDialog(currentWindow)
+                                    viewModel.save(file)
+                                }
+                            }
+
+                            button("Load") {
+                                vboxConstraints { marginTop = 5.0 }
+                                minWidth = 138.0
+                                minHeight = 50.0
+                                action {
+                                    val fileChooser = FileChooser()
+                                    val file = fileChooser.showOpenDialog(currentWindow)
+                                    viewModel.load(file)
+                                }
+                            }
                         }
                     }
                 }

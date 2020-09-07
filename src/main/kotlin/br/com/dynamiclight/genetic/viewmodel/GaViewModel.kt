@@ -6,8 +6,9 @@ import javafx.beans.property.DoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.shape.Circle
 import tornadofx.*
+import java.io.File
 
-class GaViewModel : ItemViewModel<GaModel>(GaModel()) {
+class GaViewModel : ItemViewModel<GaModel>() {
     private val interactor: GaInteractor by inject()
 
     val population = bind(GaModel::populationProperty)
@@ -19,15 +20,24 @@ class GaViewModel : ItemViewModel<GaModel>(GaModel()) {
     val elitismCount = bind(GaModel::elitismCountProperty)
     val tournament = bind(GaModel::tournamentProperty)
 
+    init {
+        item = interactor.model
+    }
+
     override fun onCommit() {
-        interactor.start(item)
+
     }
 
     fun addPoint(point: Circle) {
-        item.points.add(point)
+        interactor.addPoint(point.centerX, point.centerY, point.radius, point.fill.toString())
     }
 
-    fun save() {
-
+    fun save(file: File?) {
+        file?.let { interactor.save(it) }
     }
+
+    fun load(file: File?) {
+        file?.let { interactor.load(it) }
+    }
+
 }
