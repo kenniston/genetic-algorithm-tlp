@@ -11,6 +11,8 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 import kotlin.random.Random
 
+object UpdateCitiesRequest : FXEvent()
+
 class MainDrawView : View("Drawer") {
     private val viewModel: GaViewModel by inject()
     private val pointRadius = 10.0
@@ -18,6 +20,11 @@ class MainDrawView : View("Drawer") {
     override val root = pane {
         addEventHandler(MouseEvent.MOUSE_PRESSED, ::addPoint)
         label("Left mouse click to create a point")
+
+        subscribe<UpdateCitiesRequest> {
+            viewModel.status = messages["loading.model"]
+            loadCities()
+        }
     }
 
     private fun addPoint(evt: MouseEvent) {
@@ -25,17 +32,24 @@ class MainDrawView : View("Drawer") {
 
         if (isNearToPoint(pt.x, pt.y)) return
 
-        val c = Color.rgb(Random.nextInt(255), Random.nextInt(255), Random.nextInt(255))
-        val city = Circle(pt.x, pt.y, pointRadius, c)
-        val ripple = Circle(pt.x, pt.y, pointRadius, c)
+        val city = addCity(pt.x, pt.y, pointRadius)
+        viewModel.addCity(city)
+    }
+
+    private fun addCity(x: Double, y: Double, radius: Double, color: String? = null) : Circle {
+        val c = if (color != null) {
+            c(color)
+        } else Color.rgb(Random.nextInt(255), Random.nextInt(255), Random.nextInt(255))
+        val city = Circle(x, y, radius, c)
+        val ripple = Circle(x, y, radius, c)
         city.apply { animateFill(Duration.seconds(1.9), Color.TRANSPARENT, c) }
         ripple.apply { animateFill(Duration.seconds(1.0), c, Color.TRANSPARENT) }
         timeline {
             keyframe(Duration.seconds(0.35)) {
-                keyvalue(city.radiusProperty(), pointRadius, Interpolator.LINEAR)
+                keyvalue(city.radiusProperty(), radius, Interpolator.LINEAR)
             }
             keyframe(Duration.seconds(1.0)) {
-                keyvalue(ripple.radiusProperty(), pointRadius.times(5), Interpolator.EASE_OUT)
+                keyvalue(ripple.radiusProperty(), radius.times(5), Interpolator.EASE_OUT)
                 setOnFinished {
                     ripple.removeFromParent()
                 }
@@ -44,7 +58,8 @@ class MainDrawView : View("Drawer") {
 
         root.add(ripple)
         root.add(city)
-        viewModel.addCity(city)
+
+        return city
     }
 
     private fun isNearToPoint(x: Double, y: Double): Boolean {
@@ -55,6 +70,13 @@ class MainDrawView : View("Drawer") {
             }
         }
         return false
+    }
+
+    private fun loadCities() {
+        root.children.filterIsInstance<Circle>().forEach { it.removeFromParent() }
+        viewModel.item.cities.forEach { city ->
+            addCity(city.x, city.y, city.radius, city.color)
+        }
     }
 
 }

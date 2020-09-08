@@ -104,7 +104,6 @@ class MainLeftView : View(messages["panel.title"]) {
                                 minWidth = 145.0
                                 minHeight = 50.0
                                 action {
-                                    viewModel.commit()
                                     when (val result = viewModel.createPopulation()) {
                                         is GAResult.Error -> alert(Alert.AlertType.ERROR, messages["error.title"], result.error.localizedMessage)
                                         else -> viewModel.status = messages["population.created"]
@@ -137,7 +136,11 @@ class MainLeftView : View(messages["panel.title"]) {
                                 action {
                                     val fileChooser = FileChooser()
                                     val file = fileChooser.showSaveDialog(currentWindow)
-                                    viewModel.save(file)
+                                    when (val result = viewModel.save(file)) {
+                                        is GAResult.Success -> viewModel.status = messages["model.successfully.saved"]
+                                        is GAResult.Error -> viewModel.status = result.error.localizedMessage
+                                        else -> viewModel.status = messages["canceled"]
+                                    }
                                 }
                             }
 
@@ -148,7 +151,14 @@ class MainLeftView : View(messages["panel.title"]) {
                                 action {
                                     val fileChooser = FileChooser()
                                     val file = fileChooser.showOpenDialog(currentWindow)
-                                    viewModel.load(file)
+                                    when (val result = viewModel.load(file)) {
+                                        is GAResult.Success -> {
+                                            fire(UpdateCitiesRequest)
+                                            viewModel.status = messages["model.successfully.load"]
+                                        }
+                                        is GAResult.Error -> viewModel.status = result.error.localizedMessage
+                                        else -> viewModel.status = messages["canceled"]
+                                    }
                                 }
                             }
                         }

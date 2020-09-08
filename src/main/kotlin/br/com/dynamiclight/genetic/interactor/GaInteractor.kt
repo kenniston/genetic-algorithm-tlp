@@ -65,12 +65,19 @@ class GaInteractor : Component(), ScopedInstance {
         return data.citiesDistance[hash] ?: 0.0
     }
 
-    fun save(file: File) {
-        repository.save(file, data)
+    fun save(file: File) : GAResult<Unit> {
+        return repository.save(file, data)
     }
 
-    fun load(file: File) {
-        repository.load(file)
+    fun load(file: File) : GAResult<GaModel> {
+        return when (val result = repository.load(file)) {
+            is GAResult.Success -> {
+                data = result.data
+                generateDistanceData()
+                GAResult.Success(data)
+            }
+            else -> return GAResult.Error(Exception(messages["error.loading.model"]))
+        }
     }
 
 }

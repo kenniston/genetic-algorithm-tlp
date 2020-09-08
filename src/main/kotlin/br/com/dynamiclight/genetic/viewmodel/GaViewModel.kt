@@ -45,15 +45,28 @@ class GaViewModel : ItemViewModel<GaModel>() {
     }
 
     fun createPopulation() : GAResult<Unit> {
+        commit()
         return interactor.createPopulation()
     }
 
-    fun save(file: File?) {
-        file?.let { interactor.save(it) }
+    fun save(file: File?) : GAResult<Unit> {
+        return if (file != null) {
+            commit()
+            interactor.save(file)
+        } else GAResult.Canceled()
     }
 
-    fun load(file: File?) {
-        file?.let { interactor.load(it) }
+    fun load(file: File?) : GAResult<Unit> {
+        return if (file != null) {
+            when (val result = interactor.load(file)) {
+                is GAResult.Success -> {
+                    item = result.data
+                    GAResult.Success(Unit)
+                }
+                is GAResult.Error -> GAResult.Error(result.error)
+                else -> GAResult.Canceled()
+            }
+        } else GAResult.Canceled()
     }
 
 }

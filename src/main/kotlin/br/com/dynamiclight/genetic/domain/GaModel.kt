@@ -1,6 +1,7 @@
 package br.com.dynamiclight.genetic.domain
 
 import tornadofx.*
+import javax.json.JsonObject
 
 class GaModel : JsonModel {
     enum class MutationType {
@@ -31,8 +32,36 @@ class GaModel : JsonModel {
     var tournament: Int by property(0)
     fun tournamentProperty() = getProperty(GaModel::tournament)
 
-    val cities = mutableListOf<City>()
+    var cities = mutableListOf<City>()
     val citiesDistance = mutableMapOf<String, Double>()
 
     val individuals = mutableListOf<Individual>()
+
+    override fun updateModel(json: JsonObject) {
+        with(json) {
+            population = int("population")!!
+            crossoverRate = double("crossoverRate")!!
+            mutationRate = double("mutationRate")!!
+            evolutions = int("evolutions")!!
+            mutationType = enumValueOf(string("mutationType")!!)
+            useElitism = bool("useElitism")!!
+            elitismCount = int("elitismCount")!!
+            tournament = int("tournament")!!
+            cities = jsonArray("cities")!!.toModel()
+        }
+    }
+
+    override fun toJSON(json: JsonBuilder) {
+        with(json) {
+            add("population", population)
+            add("crossoverRate", crossoverRate)
+            add("mutationRate", mutationRate)
+            add("evolutions", evolutions)
+            add("mutationType", mutationType.name)
+            add("useElitism", useElitism)
+            add("elitismCount", elitismCount)
+            add("tournament", tournament)
+            add("cities", cities)
+        }
+    }
 }
