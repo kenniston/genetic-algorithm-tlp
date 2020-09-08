@@ -6,14 +6,14 @@ to the travelling salesman problem using genetic algorithm.
 ## The application
 
 <p align="center">
-    <img align="center" src="screenshots/main.png" width="1481" height="748">
+    <img align="center" src="screenshots/main.png">
 </p>
 <b>Application Main Window</b>
 <br/>
 <br/>
 
 <p align="center">
-    <img align="center" src="screenshots/main-create-city.png" width="1481" height="748">
+    <img align="center" src="screenshots/main-create-city.png">
 </p>
 <b>To create points (Cities) use the left mouse button in the right area of the application</b>
 <br/>
