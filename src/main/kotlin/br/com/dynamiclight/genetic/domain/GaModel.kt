@@ -2,13 +2,11 @@ package br.com.dynamiclight.genetic.domain
 
 import tornadofx.*
 
-enum class MutationType {
-    INDIVIDUAL, GENERAL, GENES
-}
+class GaModel : JsonModel {
+    enum class MutationType {
+        INDIVIDUAL, GENERAL, GENES
+    }
 
-data class Point(val x: Double, val y: Double, val radius: Double, val color: String)
-
-class GaModel {
     var population: Int by property(0)
     fun populationProperty() = getProperty(GaModel::population)
 
@@ -33,6 +31,8 @@ class GaModel {
     var tournament: Int by property(0)
     fun tournamentProperty() = getProperty(GaModel::tournament)
 
-    val points = mutableListOf<Point>()
-    val pointsDistance = mutableMapOf<String, Double>()
+    val cities = mutableListOf<City>()
+    val citiesDistance = mutableMapOf<String, Double>()
+
+    val individuals = mutableListOf<Individual>()
 }

@@ -1,9 +1,12 @@
 package br.com.dynamiclight.genetic.viewmodel
 
+import br.com.dynamiclight.genetic.domain.GAResult
 import br.com.dynamiclight.genetic.domain.GaModel
 import br.com.dynamiclight.genetic.interactor.GaInteractor
 import javafx.beans.property.DoubleProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
+import javafx.beans.property.StringProperty
 import javafx.scene.shape.Circle
 import tornadofx.*
 import java.io.File
@@ -20,6 +23,15 @@ class GaViewModel : ItemViewModel<GaModel>() {
     val elitismCount = bind(GaModel::elitismCountProperty)
     val tournament = bind(GaModel::tournamentProperty)
 
+    val statusProperty = SimpleStringProperty("")
+    var status: String by statusProperty
+
+    val evolutionResultProperty = SimpleStringProperty(messages["evolutions.result.label"])
+    var evolutionResult: String by evolutionResultProperty
+
+    val shortestDistanceProperty = SimpleStringProperty(messages["shortest.distance.label"])
+    var shortestDistance: String by shortestDistanceProperty
+
     init {
         item = interactor.model
     }
@@ -28,8 +40,12 @@ class GaViewModel : ItemViewModel<GaModel>() {
 
     }
 
-    fun addPoint(point: Circle) {
-        interactor.addPoint(point.centerX, point.centerY, point.radius, point.fill.toString())
+    fun addCity(city: Circle) {
+        interactor.addPoint(city.centerX, city.centerY, city.radius, city.fill.toString())
+    }
+
+    fun createPopulation() : GAResult<Unit> {
+        return interactor.createPopulation()
     }
 
     fun save(file: File?) {

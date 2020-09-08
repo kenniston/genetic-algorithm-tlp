@@ -9,6 +9,7 @@ class Styles : Stylesheet() {
         val heading by cssclass()
         val subtitle by cssclass()
         val paintArea by cssclass()
+        val status by cssclass()
     }
 
     init {
@@ -24,6 +25,10 @@ class Styles : Stylesheet() {
 
         paintArea {
             backgroundColor += Color.LIGHTGRAY
+        }
+
+        status {
+            fontWeight = FontWeight.BOLD
         }
     }
 }

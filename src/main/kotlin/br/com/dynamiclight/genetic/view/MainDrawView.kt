@@ -1,6 +1,5 @@
 package br.com.dynamiclight.genetic.view
 
-import br.com.dynamiclight.genetic.app.Styles
 import br.com.dynamiclight.genetic.viewmodel.GaViewModel
 import javafx.animation.Interpolator
 import javafx.scene.input.MouseEvent
@@ -27,13 +26,13 @@ class MainDrawView : View("Drawer") {
         if (isNearToPoint(pt.x, pt.y)) return
 
         val c = Color.rgb(Random.nextInt(255), Random.nextInt(255), Random.nextInt(255))
-        val circle = Circle(pt.x, pt.y, pointRadius, c)
+        val city = Circle(pt.x, pt.y, pointRadius, c)
         val ripple = Circle(pt.x, pt.y, pointRadius, c)
-        circle.apply { animateFill(Duration.seconds(1.9), Color.TRANSPARENT, c) }
+        city.apply { animateFill(Duration.seconds(1.9), Color.TRANSPARENT, c) }
         ripple.apply { animateFill(Duration.seconds(1.0), c, Color.TRANSPARENT) }
         timeline {
             keyframe(Duration.seconds(0.35)) {
-                keyvalue(circle.radiusProperty(), pointRadius, Interpolator.LINEAR)
+                keyvalue(city.radiusProperty(), pointRadius, Interpolator.LINEAR)
             }
             keyframe(Duration.seconds(1.0)) {
                 keyvalue(ripple.radiusProperty(), pointRadius.times(5), Interpolator.EASE_OUT)
@@ -44,12 +43,12 @@ class MainDrawView : View("Drawer") {
         }
 
         root.add(ripple)
-        root.add(circle)
-        viewModel.addPoint(circle)
+        root.add(city)
+        viewModel.addCity(city)
     }
 
     private fun isNearToPoint(x: Double, y: Double): Boolean {
-        viewModel.item.points.forEach {
+        viewModel.item.cities.forEach {
             val distance = sqrt((it.x - x).pow(2.0) + (it.y - y).pow(2.0))
             if (distance <= pointRadius * 2) {
                 return true
