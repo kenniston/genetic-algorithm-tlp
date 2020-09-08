@@ -4,16 +4,18 @@ import tornadofx.*
 import javax.json.JsonObject
 
 data class City(
+    var name: String,
     var x: Double,
     var y: Double,
     var radius: Double,
     var color: String
 ) : JsonModel {
 
-    constructor() : this(0.0, 0.0, 0.0, "")
+    constructor() : this("", 0.0, 0.0, 0.0, "")
 
     override fun toJSON(json: JsonBuilder) {
         with(json) {
+            add("name", name)
             add("x", x)
             add("y", y)
             add("radius", radius)
@@ -23,6 +25,7 @@ data class City(
 
     override fun updateModel(json: JsonObject) {
         with(json) {
+            name = string("name")!!
             x = double("x")!!
             y = double("y")!!
             radius = double("radius")!!

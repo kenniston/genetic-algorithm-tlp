@@ -18,8 +18,8 @@ class GaInteractor : Component(), ScopedInstance {
     val model: GaModel
         get() = data
 
-    fun addPoint(x: Double, y: Double, radius: Double, color: String) {
-        data.cities.add(City(x, y, radius, color))
+    fun addPoint(name: String, x: Double, y: Double, radius: Double, color: String) {
+        data.cities.add(City(name, x, y, radius, color))
         generateDistanceData()
     }
 

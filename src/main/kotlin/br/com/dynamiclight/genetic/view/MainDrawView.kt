@@ -1,7 +1,10 @@
 package br.com.dynamiclight.genetic.view
 
 import br.com.dynamiclight.genetic.viewmodel.GaViewModel
+import io.github.serpro69.kfaker.Faker
 import javafx.animation.Interpolator
+import javafx.geometry.Pos
+import javafx.scene.control.Label
 import javafx.scene.input.MouseEvent
 import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
@@ -16,13 +19,16 @@ object UpdateCitiesRequest : FXEvent()
 class MainDrawView : View("Drawer") {
     private val viewModel: GaViewModel by inject()
     private val pointRadius = 10.0
+    private val faker = Faker()
 
     override val root = pane {
-        addEventHandler(MouseEvent.MOUSE_PRESSED, ::addPoint)
-        label("Left mouse click to create a point")
+        vbox {
+            label(messages["drawer.message"])
+            label(viewModel.citiesProperty)
+        }
 
+        addEventHandler(MouseEvent.MOUSE_PRESSED, ::addPoint)
         subscribe<UpdateCitiesRequest> {
-            viewModel.status = messages["loading.model"]
             loadCities()
         }
     }
@@ -36,7 +42,7 @@ class MainDrawView : View("Drawer") {
         viewModel.addCity(city)
     }
 
-    private fun addCity(x: Double, y: Double, radius: Double, color: String? = null) : Circle {
+    private fun addCity(x: Double, y: Double, radius: Double, color: String? = null, name: String? = null) : Circle {
         val c = if (color != null) {
             c(color)
         } else Color.rgb(Random.nextInt(255), Random.nextInt(255), Random.nextInt(255))
@@ -59,6 +65,14 @@ class MainDrawView : View("Drawer") {
         root.add(ripple)
         root.add(city)
 
+        city.id = name ?: faker.address.city()
+        city.add(label(city.id) {
+            minWidth = 200.0
+            maxWidth = 200.0
+            alignment = Pos.CENTER
+            relocate(city.centerX - maxWidth / 2, city.centerY + city.radius)
+        })
+
         return city
     }
 
@@ -73,9 +87,9 @@ class MainDrawView : View("Drawer") {
     }
 
     private fun loadCities() {
-        root.children.filterIsInstance<Circle>().forEach { it.removeFromParent() }
+        root.children.filter { it is Circle || it is Label }.forEach { it.removeFromParent() }
         viewModel.item.cities.forEach { city ->
-            addCity(city.x, city.y, city.radius, city.color)
+            addCity(city.x, city.y, city.radius, city.color, city.name)
         }
     }
 

@@ -10,6 +10,8 @@ import javafx.beans.property.StringProperty
 import javafx.scene.shape.Circle
 import tornadofx.*
 import java.io.File
+import java.text.MessageFormat
+import java.util.*
 
 class GaViewModel : ItemViewModel<GaModel>() {
     private val interactor: GaInteractor by inject()
@@ -32,8 +34,12 @@ class GaViewModel : ItemViewModel<GaModel>() {
     val shortestDistanceProperty = SimpleStringProperty(messages["shortest.distance.label"])
     var shortestDistance: String by shortestDistanceProperty
 
+    val citiesProperty = SimpleStringProperty("")
+    var cities: String by citiesProperty
+
     init {
         item = interactor.model
+        cities = String.format(messages["cities.count.message"], item.cities.size)
     }
 
     override fun onCommit() {
@@ -41,7 +47,8 @@ class GaViewModel : ItemViewModel<GaModel>() {
     }
 
     fun addCity(city: Circle) {
-        interactor.addPoint(city.centerX, city.centerY, city.radius, city.fill.toString())
+        interactor.addPoint(city.id, city.centerX, city.centerY, city.radius, city.fill.toString())
+        cities = String.format(messages["cities.count.message"], item.cities.size)
     }
 
     fun createPopulation() : GAResult<Unit> {
@@ -61,6 +68,7 @@ class GaViewModel : ItemViewModel<GaModel>() {
             when (val result = interactor.load(file)) {
                 is GAResult.Success -> {
                     item = result.data
+                    cities = String.format(messages["cities.count.message"], item.cities.size)
                     GAResult.Success(Unit)
                 }
                 is GAResult.Error -> GAResult.Error(result.error)

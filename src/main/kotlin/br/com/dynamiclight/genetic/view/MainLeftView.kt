@@ -125,7 +125,8 @@ class MainLeftView : View(messages["panel.title"]) {
                                 minWidth = 145.0
                                 minHeight = 50.0
                                 action {
-
+                                    viewModel.item.cities.clear()
+                                    fire(UpdateCitiesRequest)
                                 }
                             }
 
