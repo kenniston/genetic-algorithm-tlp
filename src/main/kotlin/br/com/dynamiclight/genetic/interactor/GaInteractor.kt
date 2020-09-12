@@ -5,6 +5,7 @@ import br.com.dynamiclight.genetic.domain.City
 import br.com.dynamiclight.genetic.domain.GAResult
 import br.com.dynamiclight.genetic.domain.Individual
 import br.com.dynamiclight.genetic.repository.GaRepository
+import io.github.serpro69.kfaker.Faker
 import tornadofx.*
 import java.io.File
 import java.lang.Exception
@@ -13,12 +14,13 @@ import kotlin.math.sqrt
 
 class GaInteractor : Component(), ScopedInstance {
     private val repository: GaRepository by inject()
+    private val faker = Faker()
 
     private var data = GaModel()
     val model: GaModel
         get() = data
 
-    fun addPoint(name: String, x: Double, y: Double, radius: Double, color: String) {
+    fun addCity(name: String, x: Double, y: Double, radius: Double, color: String) {
         data.cities.add(City(name, x, y, radius, color))
         generateDistanceData()
     }
@@ -33,7 +35,7 @@ class GaInteractor : Component(), ScopedInstance {
         }
     }
 
-    fun createPopulation() : GAResult<Unit> {
+    fun createPopulation(): GAResult<Unit> {
         if (data.cities.size < 2) return GAResult.Error(Exception(messages["error.city.quantity"]))
 
         if (data.population < 1) return GAResult.Error(Exception(messages["error.population.size"]))
@@ -42,7 +44,7 @@ class GaInteractor : Component(), ScopedInstance {
         for (index in 0 until data.population) {
             val chromosome = (0 until data.cities.size).shuffled()
             val fitness = calculateIndividualFitness(chromosome)
-            val individual = Individual(chromosome, fitness)
+            val individual = Individual(faker.name.firstName(), chromosome, fitness, index)
             data.individuals.add(individual)
         }
         return GAResult.Success(Unit)
@@ -60,16 +62,47 @@ class GaInteractor : Component(), ScopedInstance {
         return distance
     }
 
-    fun getCitiesDistance(start: Int, end: Int) : Double {
+    private fun updateIndividualPosition() {
+        data.individuals.forEachIndexed { index, ind -> ind.position = index }
+    }
+
+    private fun populationFitnessAverage(): Double {
+        var sum: Double = 0.0;
+        data.individuals.forEach { sum += it.fitness }
+        return sum / data.individuals.size
+    }
+
+    private fun sortPopulation() {
+        data.individuals.sortBy { it.fitness }
+        updateIndividualPosition()
+    }
+
+    private fun getWorstIndividual(): Individual {
+        sortPopulation()
+        return data.individuals.last()
+    }
+
+    private fun getBestIndividual(): Individual {
+        sortPopulation()
+        return data.individuals.first()
+    }
+
+    fun getCitiesDistance(start: Int, end: Int): Double {
         val hash = "${data.cities[start].hashCode()}.${data.cities[end].hashCode()}"
         return data.citiesDistance[hash] ?: 0.0
     }
 
-    fun save(file: File) : GAResult<Unit> {
+    fun executeGA() {
+
+    }
+
+    
+
+    fun save(file: File): GAResult<Unit> {
         return repository.save(file, data)
     }
 
-    fun load(file: File) : GAResult<GaModel> {
+    fun load(file: File): GAResult<GaModel> {
         return when (val result = repository.load(file)) {
             is GAResult.Success -> {
                 data = result.data

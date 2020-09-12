@@ -9,7 +9,7 @@ to the travelling salesman problem using genetic algorithm.
     <img align="center" src="screenshots/main.png">
 </p>
 <b>Application Main Window</b>
-<br/>
+<br/>rtin
 <br/>
 
 <p align="center">

@@ -6,12 +6,9 @@ import br.com.dynamiclight.genetic.interactor.GaInteractor
 import javafx.beans.property.DoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.beans.property.StringProperty
 import javafx.scene.shape.Circle
 import tornadofx.*
 import java.io.File
-import java.text.MessageFormat
-import java.util.*
 
 class GaViewModel : ItemViewModel<GaModel>() {
     private val interactor: GaInteractor by inject()
@@ -47,7 +44,7 @@ class GaViewModel : ItemViewModel<GaModel>() {
     }
 
     fun addCity(city: Circle) {
-        interactor.addPoint(city.id, city.centerX, city.centerY, city.radius, city.fill.toString())
+        interactor.addCity(city.id, city.centerX, city.centerY, city.radius, city.fill.toString())
         cities = String.format(messages["cities.count.message"], item.cities.size)
     }
 
