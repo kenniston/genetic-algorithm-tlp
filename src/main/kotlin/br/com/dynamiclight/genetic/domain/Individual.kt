@@ -22,4 +22,12 @@ data class Individual(var name: String, var chromosome: List<Int>, var fitness: 
             position = int("position")!!
         }
     }
+
+    override fun toString(): String {
+        var route = ""
+        chromosome.forEach { route = "$route $it ->" }
+        route = "$route ${chromosome[0]}"
+
+        return "Route for $name: $route. Distance: $fitness"
+    }
 }
