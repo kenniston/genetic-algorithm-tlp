@@ -48,19 +48,26 @@ class GaViewModel : ItemViewModel<GaModel>() {
         cities = String.format(messages["cities.count.message"], item.cities.size)
     }
 
-    fun createPopulation() : GAResult<Unit> {
+    fun createPopulation(): GAResult<Unit> {
         commit()
         return interactor.createPopulation()
     }
 
-    fun save(file: File?) : GAResult<Unit> {
+    fun run(): GAResult<Unit> {
+        if (item.individuals.size == 0) {
+
+        }
+        return interactor.executeGA()
+    }
+
+    fun save(file: File?): GAResult<Unit> {
         return if (file != null) {
             commit()
             interactor.save(file)
         } else GAResult.Canceled()
     }
 
-    fun load(file: File?) : GAResult<Unit> {
+    fun load(file: File?): GAResult<Unit> {
         return if (file != null) {
             when (val result = interactor.load(file)) {
                 is GAResult.Success -> {

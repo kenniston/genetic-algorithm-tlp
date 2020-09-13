@@ -11,9 +11,9 @@ import java.lang.Exception
 class GaRepository: Component(), ScopedInstance {
     fun save(file: File, data: GaModel) : GAResult<Unit> {
         return try {
-            val json = data.toJSON()
+            val json = data.toJSON().toPrettyString()
             val out = FileOutputStream(file)
-            json.save(out)
+            out.use { it.write(json.toByteArray()) }
             return GAResult.Success(Unit)
         } catch (e: Exception) {
             GAResult.Error(e)

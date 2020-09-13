@@ -26,14 +26,14 @@ class MainLeftView : View(messages["panel.title"]) {
     override val root = form {
         hbox {
             vbox {
-                hbox (125) {
+                hbox(125) {
                     fieldset {
                         hboxConstraints { marginLeft = 20.0 }
                         vbox {
                             field(messages["population.size.label"]) {
                                 textfield(viewModel.population) {
                                     alignment = Pos.CENTER_RIGHT
-                                    maxWidth =  110.0
+                                    maxWidth = 110.0
                                 }
                             }
                             field(messages["crossover.rate.label"]) {
@@ -116,7 +116,7 @@ class MainLeftView : View(messages["panel.title"]) {
                                 minWidth = 145.0
                                 minHeight = 50.0
                                 action {
-
+                                    viewModel.run()
                                 }
                             }
 
@@ -180,7 +180,7 @@ class MainLeftView : View(messages["panel.title"]) {
                 }
             }
 
-            separator (Orientation.VERTICAL) {
+            separator(Orientation.VERTICAL) {
                 hboxConstraints { marginLeft = 5.0 }
             }
 
