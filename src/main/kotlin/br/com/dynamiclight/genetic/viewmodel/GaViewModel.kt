@@ -57,7 +57,16 @@ class GaViewModel : ItemViewModel<GaModel>() {
 
     fun run(): GAResult<Unit> {
         commit()
-        return interactor.executeGA()
+        val result = interactor.executeGA()
+        return when (result) {
+            is GAResult.Success -> {
+                val (evolutionCount, populationFitnessAverage) = result.data
+
+                GAResult.Success(Unit)
+            }
+            is GAResult.Error -> return result
+            else -> GAResult.Canceled()
+        }
     }
 
     fun stop(): GAResult<Unit> {

@@ -35,7 +35,7 @@ class GaModel : JsonModel {
     var cities = mutableListOf<City>()
     val citiesDistance = mutableMapOf<String, Double>()
 
-    val individuals = mutableListOf<Individual>()
+    var individuals = mutableListOf<Individual>()
 
     override fun updateModel(json: JsonObject) {
         with(json) {

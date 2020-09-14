@@ -16,6 +16,7 @@ import kotlin.random.Random
 class GaInteractor : Component(), ScopedInstance {
     private val repository: GaRepository by inject()
     private val faker = Faker()
+    private var evolutionCount = 0;
 
     private var data = GaModel()
     val model: GaModel
@@ -73,8 +74,8 @@ class GaInteractor : Component(), ScopedInstance {
         return GAResult.Success(Unit)
     }
 
-    private fun updateIndividualPosition() {
-        data.individuals.forEachIndexed { index, ind -> ind.position = index }
+    private fun updateIndividualPosition(population: MutableList<Individual>) {
+        population.forEachIndexed { index, ind -> ind.position = index }
     }
 
     private fun populationFitnessAverage(): Double {
@@ -83,19 +84,19 @@ class GaInteractor : Component(), ScopedInstance {
         return sum / data.individuals.size
     }
 
-    private fun sortPopulation() {
-        data.individuals.sortBy { it.fitness }
-        updateIndividualPosition()
+    private fun sortPopulation(population: MutableList<Individual>) {
+        population.sortBy { it.fitness }
+        updateIndividualPosition(population)
     }
 
-    private fun getWorstIndividual(): Individual {
-        sortPopulation()
-        return data.individuals.last()
+    private fun getWorstIndividual(population: MutableList<Individual>): Individual {
+        sortPopulation(population)
+        return population.last()
     }
 
-    private fun getBestIndividual(): Individual {
-        sortPopulation()
-        return data.individuals.first()
+    private fun getBestIndividual(population: MutableList<Individual>): Individual {
+        sortPopulation(population)
+        return population.first()
     }
 
     // Genetic Algorithm
@@ -103,39 +104,76 @@ class GaInteractor : Component(), ScopedInstance {
     /**
      * Performs a new evolution in the Genetic Algorithm.
      * Steps:
-     *      Create population
-     *      Evaluate population
+     *      Create a temporary population
      *      Elitism
      *      Select parents (Tournament)
      *      Crossver
      *      Mutation
-     *      Evaluation
-     *      Insert new indiviuals into the new population
+     *      Insert Elite Individuals into temporary population
      */
-    fun executeGA(): GAResult<Unit> {
+    fun executeGA(): GAResult<Pair<Int, Double>> {
         if (data.cities.size < 2) return GAResult.Error(Exception(messages["error.city.quantity"]))
         if (data.population < 1) return GAResult.Error(Exception(messages["error.population.size"]))
+        if (data.tournament > data.individuals.size) return GAResult.Error(Exception(messages["error.tournament.size"]))
+        if (data.tournament < 2) return GAResult.Error(Exception(messages["error.tournament.minimum.size"]))
 
-        // Crossover
-        //println("Parent 1: ${data.individuals[0]}")
-        //println("Parent 2: ${data.individuals[1]}")
-        val (a, b) = crossoverPMX(data.individuals[0], data.individuals[1])
-        //println("Child  1: $a")
-        //println("Child  2: $b")
+        // Random numbers
+        val rnd = Random(System.currentTimeMillis())
 
-        // Mutation
-        val m = mutation(b)
-        println("Mutation: $m")
+        // Create a temporary population
+        val tempIndividuals = data.individuals.toMutableList()
 
-        // Tournament
-        val tournamentResult = tournament()
-        when (tournamentResult) {
-            is GAResult.Success -> println("Winner: ${tournamentResult.data}")
-            is GAResult.Error -> return tournamentResult
-            else -> GAResult.Canceled()
+        // Elitism
+        val elitismIndividuals = mutableListOf<Individual>()
+        if (data.useElitism) {
+            tempIndividuals.sortBy { it.fitness }
+            for (index in 0..data.elitismCount) {
+                elitismIndividuals.add(tempIndividuals[index])
+            }
         }
 
-        return GAResult.Success(Unit)
+        for (index in 0..data.individuals.size.div(2)) {
+            // Tournament
+            val father1 = tournament()
+            val father2 = tournament()
+
+            // Crossover
+            if (rnd.nextDouble() <= data.crossoverRate) {
+                var (a, b) = crossoverPMX(father1, father2)
+
+                // Individual Mutation
+                if (data.mutationType == GaModel.MutationType.INDIVIDUAL) {
+                    a = mutate(a)
+                    b = mutate(b)
+                }
+
+                // Replace parent for child
+                tempIndividuals[father1.position] = a
+                tempIndividuals[father2.position] = b
+            }
+        }
+
+        // Mutate Population
+        if (data.mutationType == GaModel.MutationType.GENERAL) {
+            mutatePopulation(tempIndividuals)
+        }
+
+        // Elite
+        if (data.useElitism) {
+            tempIndividuals.sortBy { it.fitness }
+            val startIndex = tempIndividuals.size - elitismIndividuals.size
+            elitismIndividuals.forEach { tempIndividuals.set(startIndex, it) }
+        }
+
+        // Update Population
+        data.individuals = tempIndividuals
+
+        return GAResult.Success(Pair(evolutionCount, populationFitnessAverage()))
+    }
+
+    fun restart() {
+        evolutionCount = 0
+        createPopulation()
     }
 
     private fun crossoverPMX(father1: Individual, father2: Individual): Pair<Individual, Individual> {
@@ -176,7 +214,7 @@ class GaInteractor : Component(), ScopedInstance {
         return Pair(individual1, individual2)
     }
 
-    private fun mutation(individual: Individual): Individual {
+    private fun mutate(individual: Individual): Individual {
         val rnd = Random(System.currentTimeMillis())
 
         if (rnd.nextDouble(0.0, 1.0) > data.mutationRate ) return individual
@@ -193,14 +231,11 @@ class GaInteractor : Component(), ScopedInstance {
         return individual
     }
 
-    private fun populationMutation() {
-        data.individuals.forEach { mutation(it) }
+    private fun mutatePopulation(population: MutableList<Individual>) {
+        population.forEach { mutate(it) }
     }
 
-    private fun tournament(): GAResult<Individual> {
-        if (data.tournament > data.individuals.size) return GAResult.Error(Exception(messages["error.tournament.size"]))
-        if (data.tournament < 2) return GAResult.Error(Exception(messages["error.tournament.minimum.size"]))
-
+    private fun tournament(): Individual {
         var winner = Individual(faker.name.firstName(), mutableListOf(), Double.MAX_VALUE, -1)
 
         var rnd = (0 until data.individuals.size).shuffled()
@@ -212,7 +247,7 @@ class GaInteractor : Component(), ScopedInstance {
             winner = if (competitor.fitness < winner.fitness) competitor else winner
             winner.fitness = calculateIndividualFitness(winner.chromosome)
         }
-        return GAResult.Success(winner)
+        return winner
     }
 
     // File
