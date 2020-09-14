@@ -4,7 +4,7 @@ import tornadofx.*
 import javax.json.JsonNumber
 import javax.json.JsonObject
 
-data class Individual(var name: String, var chromosome: List<Int>, var fitness: Double, var position: Int) : JsonModel {
+data class Individual(var name: String, var chromosome: MutableList<Int>, var fitness: Double, var position: Int) : JsonModel {
     override fun toJSON(json: JsonBuilder) {
         with(json) {
             add("name", name)
@@ -28,6 +28,6 @@ data class Individual(var name: String, var chromosome: List<Int>, var fitness: 
         chromosome.forEach { route = "$route $it ->" }
         route = "$route ${chromosome[0]}"
 
-        return "Route for $name: $route. Distance: $fitness"
+        return "$name - Route: $route. Distance: $fitness"
     }
 }

@@ -34,6 +34,8 @@ class GaViewModel : ItemViewModel<GaModel>() {
     val citiesProperty = SimpleStringProperty("")
     var cities: String by citiesProperty
 
+    var running = false
+
     init {
         item = interactor.model
         cities = String.format(messages["cities.count.message"], item.cities.size)
@@ -54,10 +56,12 @@ class GaViewModel : ItemViewModel<GaModel>() {
     }
 
     fun run(): GAResult<Unit> {
-        if (item.individuals.size == 0) {
-
-        }
+        commit()
         return interactor.executeGA()
+    }
+
+    fun stop(): GAResult<Unit> {
+        return GAResult.Success(Unit)
     }
 
     fun save(file: File?): GAResult<Unit> {

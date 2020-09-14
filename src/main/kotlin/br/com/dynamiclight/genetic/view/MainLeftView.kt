@@ -64,7 +64,7 @@ class MainLeftView : View(messages["panel.title"]) {
                                         bind(viewModel.mutationType)
                                         radiobutton(messages["new.individual.radio.label"], value = MutationType.INDIVIDUAL) { isSelected = true }
                                         radiobutton(messages["general.population.radio.label"], value = MutationType.GENERAL)
-                                        radiobutton(messages["population.genes.radio.label"], value = MutationType.GENES)
+                                        //radiobutton(messages["population.genes.radio.label"], value = MutationType.GENES)
                                     }
                                 }
                             }
@@ -116,7 +116,12 @@ class MainLeftView : View(messages["panel.title"]) {
                                 minWidth = 145.0
                                 minHeight = 50.0
                                 action {
-                                    viewModel.run()
+                                    val result = if (viewModel.running) viewModel.stop() else viewModel.run()
+                                    when (result) {
+                                        is GAResult.Success -> viewModel.status = messages["running"]
+                                        is GAResult.Error -> alert(Alert.AlertType.ERROR, messages["error.title"], result.error.localizedMessage)
+                                        else -> viewModel.status = messages["canceled"]
+                                    }
                                 }
                             }
 
