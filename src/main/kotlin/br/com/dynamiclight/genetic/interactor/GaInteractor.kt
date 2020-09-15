@@ -111,7 +111,7 @@ class GaInteractor : Component(), ScopedInstance {
      *      Mutation
      *      Insert Elite Individuals into temporary population
      */
-    fun executeGA(): GAResult<Pair<Int, Double>> {
+    fun executeGA(): GAResult<Triple<Int, Double, Individual>> {
         if (data.cities.size < 2) return GAResult.Error(Exception(messages["error.city.quantity"]))
         if (data.population < 1) return GAResult.Error(Exception(messages["error.population.size"]))
         if (data.tournament > data.individuals.size) return GAResult.Error(Exception(messages["error.tournament.size"]))
@@ -122,6 +122,7 @@ class GaInteractor : Component(), ScopedInstance {
 
         // Create a temporary population
         val tempIndividuals = data.individuals.toMutableList()
+        updateIndividualPosition(tempIndividuals)
 
         // Elitism
         val elitismIndividuals = mutableListOf<Individual>()
@@ -168,7 +169,13 @@ class GaInteractor : Component(), ScopedInstance {
         // Update Population
         data.individuals = tempIndividuals
 
-        return GAResult.Success(Pair(evolutionCount, populationFitnessAverage()))
+        // Best Individual
+        val best = getBestIndividual(data.individuals)
+
+        // Evolutions
+        evolutionCount += 1
+
+        return GAResult.Success(Triple(evolutionCount, populationFitnessAverage(), best))
     }
 
     fun restart() {
@@ -206,10 +213,10 @@ class GaInteractor : Component(), ScopedInstance {
         }
 
         val fitness1 = calculateIndividualFitness(childChromosome1)
-        val individual1 = Individual(faker.name.firstName(), childChromosome1, fitness1, 0)
+        val individual1 = Individual(faker.name.firstName(), childChromosome1, fitness1, father1.position)
 
         val fitness2 = calculateIndividualFitness(childChromosome2)
-        val individual2 = Individual(faker.name.firstName(), childChromosome2, fitness2, 0)
+        val individual2 = Individual(faker.name.firstName(), childChromosome2, fitness2, father2.position)
 
         return Pair(individual1, individual2)
     }
@@ -242,7 +249,7 @@ class GaInteractor : Component(), ScopedInstance {
         for (index in 0 until data.tournament) {
             val competitor = data.individuals[rnd[index]]
 
-            println("\tCompetidor: $competitor")
+            //println("\tCompetidor: $competitor")
 
             winner = if (competitor.fitness < winner.fitness) competitor else winner
             winner.fitness = calculateIndividualFitness(winner.chromosome)

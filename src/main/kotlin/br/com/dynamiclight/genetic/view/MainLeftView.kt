@@ -3,6 +3,7 @@ package br.com.dynamiclight.genetic.view
 import br.com.dynamiclight.genetic.app.Styles
 import br.com.dynamiclight.genetic.domain.GAResult
 import br.com.dynamiclight.genetic.domain.GaModel.MutationType
+import br.com.dynamiclight.genetic.domain.Individual
 import br.com.dynamiclight.genetic.viewmodel.GaViewModel
 import javafx.geometry.Orientation
 import javafx.geometry.Pos
@@ -15,12 +16,33 @@ import tornadofx.*
 import tornadofx.FX.Companion.messages
 import java.text.DecimalFormatSymbols
 
+class UpdateGARequest(val result: GAResult<Triple<Int, Double, Individual>>) : FXEvent()
+
 class MainLeftView : View(messages["panel.title"]) {
     private val viewModel: GaViewModel by inject()
 
     private val doubleFilter: (TextFormatter.Change) -> Boolean = { change ->
         val decimalSep = DecimalFormatSymbols.getInstance().decimalSeparator
-        !change.isAdded || change.controlNewText.matches("\\d+(${decimalSep})?(\\d+)?".toRegex())
+            !change.isAdded || change.controlNewText.matches("\\d+(${decimalSep})?(\\d+)?".toRegex())
+    }
+
+    init {
+        viewModel.evolutionResult = String.format(messages["evolutions.result.label"], 0)
+        viewModel.shortestDistance = String.format(messages["shortest.distance.label"], 0.0f)
+
+        subscribe<UpdateGARequest> {
+            when (it.result) {
+                is GAResult.Success -> {
+                    val (evolutionCount, populationAverage, best) = it.result.data
+                    viewModel.evolutionResult = String.format(messages["evolutions.result.label"], evolutionCount)
+                    viewModel.shortestDistance = String.format(messages["shortest.distance.label"], best.fitness)
+
+                    // Update Chart
+                }
+                is GAResult.Error -> alert(Alert.AlertType.ERROR, messages["error.title"], it.result.error.localizedMessage)
+                else -> viewModel.status = messages["canceled"]
+            }
+        }
     }
 
     override val root = form {
@@ -116,11 +138,9 @@ class MainLeftView : View(messages["panel.title"]) {
                                 minWidth = 145.0
                                 minHeight = 50.0
                                 action {
-                                    val result = if (viewModel.running) viewModel.stop() else viewModel.run()
-                                    when (result) {
-                                        is GAResult.Success -> viewModel.status = messages["running"]
-                                        is GAResult.Error -> alert(Alert.AlertType.ERROR, messages["error.title"], result.error.localizedMessage)
-                                        else -> viewModel.status = messages["canceled"]
+                                    viewModel.commit()
+                                    runAsync {
+                                        viewModel.run()
                                     }
                                 }
                             }

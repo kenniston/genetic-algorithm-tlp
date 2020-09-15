@@ -2,7 +2,9 @@ package br.com.dynamiclight.genetic.viewmodel
 
 import br.com.dynamiclight.genetic.domain.GAResult
 import br.com.dynamiclight.genetic.domain.GaModel
+import br.com.dynamiclight.genetic.domain.Individual
 import br.com.dynamiclight.genetic.interactor.GaInteractor
+import br.com.dynamiclight.genetic.view.UpdateGARequest
 import javafx.beans.property.DoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -55,17 +57,10 @@ class GaViewModel : ItemViewModel<GaModel>() {
         return interactor.createPopulation()
     }
 
-    fun run(): GAResult<Unit> {
-        commit()
-        val result = interactor.executeGA()
-        return when (result) {
-            is GAResult.Success -> {
-                val (evolutionCount, populationFitnessAverage) = result.data
-
-                GAResult.Success(Unit)
-            }
-            is GAResult.Error -> return result
-            else -> GAResult.Canceled()
+    fun run() {
+        for (count in 0..item.evolutions) {
+            val evo = interactor.executeGA()
+            fire(UpdateGARequest(evo))
         }
     }
 
