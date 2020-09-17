@@ -21,6 +21,8 @@ class MainLeftView : View(messages["panel.title"]) {
     private val viewModel: GaViewModel by inject()
     private val chart: LineChart<Number, Number>
     private val series = XYChart.Series<Number, Number>()
+    private val xChartAxis = NumberAxis()
+    private val yChartAxis = NumberAxis()
 
     private val doubleFilter: (TextFormatter.Change) -> Boolean = { change ->
         val decimalSep = DecimalFormatSymbols.getInstance().decimalSeparator
@@ -31,14 +33,14 @@ class MainLeftView : View(messages["panel.title"]) {
         viewModel.evolutionResult = String.format(messages["evolutions.result.label"], 0)
         viewModel.shortestDistance = String.format(messages["shortest.distance.label"], 0.0f)
 
-        val x = NumberAxis()
-        x.label = messages["chart.evolutions.label"]
-        val y = NumberAxis()
-        y.label = messages["chart.fitness.label"]
-        chart = linechart(messages["chart.title"], x, y)
+        xChartAxis.label = messages["chart.evolutions.label"]
+        xChartAxis.isForceZeroInRange = false
+        yChartAxis.label = messages["chart.fitness.label"]
+        chart = linechart(messages["chart.title"], xChartAxis, yChartAxis)
         chart.isLegendVisible = false
         chart.data.add(series)
         chart.createSymbols = false
+        chart.animated = true
 
         subscribe<UpdateGARequest> {
             when (it.result) {
@@ -46,6 +48,10 @@ class MainLeftView : View(messages["panel.title"]) {
                     val (evolutionCount, populationAverage, best) = it.result.data
                     viewModel.evolutionResult = String.format(messages["evolutions.result.label"], evolutionCount)
                     viewModel.shortestDistance = String.format(messages["shortest.distance.label"], best.fitness)
+
+                    if (series.data.size > viewModel.item.evolutions) {
+                        series.data.remove(0, viewModel.item.evolutions / 2)
+                    }
 
                     val point = XYChart.Data(evolutionCount as Number, populationAverage as Number)
                     series.data.add(point)
@@ -203,20 +209,6 @@ class MainLeftView : View(messages["panel.title"]) {
                 }
 
                 add(chart)
-
-//                linechart(null, CategoryAxis(), NumberAxis()) {
-//                    id = "chart"
-//                    maxWidth = 500.0
-//                    minWidth = 500.0
-//                    minHeight = 300.0
-//                    maxHeight = 300.0
-//                    isLegendVisible = true
-//                    series("Population") {
-//                        data("MAR", 80)
-//                        data("APR", 100)
-//                        data("MAY", 15038)
-//                    }
-//                }
             }
 
             separator(Orientation.VERTICAL) {

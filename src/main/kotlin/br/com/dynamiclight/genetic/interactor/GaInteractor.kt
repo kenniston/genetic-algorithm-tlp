@@ -119,7 +119,7 @@ class GaInteractor : Component(), ScopedInstance {
 
         // Evolutions
         evolutionCount += 1
-        
+
         // Random numbers
         val rnd = Random(System.currentTimeMillis())
 
