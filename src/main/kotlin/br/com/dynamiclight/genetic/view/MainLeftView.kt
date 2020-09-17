@@ -7,8 +7,7 @@ import br.com.dynamiclight.genetic.domain.Individual
 import br.com.dynamiclight.genetic.viewmodel.GaViewModel
 import javafx.geometry.Orientation
 import javafx.geometry.Pos
-import javafx.scene.chart.CategoryAxis
-import javafx.scene.chart.NumberAxis
+import javafx.scene.chart.*
 import javafx.scene.control.Alert
 import javafx.scene.control.TextFormatter
 import javafx.stage.FileChooser
@@ -20,6 +19,8 @@ class UpdateGARequest(val result: GAResult<Triple<Int, Double, Individual>>) : F
 
 class MainLeftView : View(messages["panel.title"]) {
     private val viewModel: GaViewModel by inject()
+    private val chart: LineChart<Number, Number>
+    private val series = XYChart.Series<Number, Number>()
 
     private val doubleFilter: (TextFormatter.Change) -> Boolean = { change ->
         val decimalSep = DecimalFormatSymbols.getInstance().decimalSeparator
@@ -30,6 +31,15 @@ class MainLeftView : View(messages["panel.title"]) {
         viewModel.evolutionResult = String.format(messages["evolutions.result.label"], 0)
         viewModel.shortestDistance = String.format(messages["shortest.distance.label"], 0.0f)
 
+        val x = NumberAxis()
+        x.label = messages["chart.evolutions.label"]
+        val y = NumberAxis()
+        y.label = messages["chart.fitness.label"]
+        chart = linechart(messages["chart.title"], x, y)
+        chart.isLegendVisible = false
+        chart.data.add(series)
+        chart.createSymbols = false
+
         subscribe<UpdateGARequest> {
             when (it.result) {
                 is GAResult.Success -> {
@@ -37,7 +47,8 @@ class MainLeftView : View(messages["panel.title"]) {
                     viewModel.evolutionResult = String.format(messages["evolutions.result.label"], evolutionCount)
                     viewModel.shortestDistance = String.format(messages["shortest.distance.label"], best.fitness)
 
-                    // Update Chart
+                    val point = XYChart.Data(evolutionCount as Number, populationAverage as Number)
+                    series.data.add(point)
                 }
                 is GAResult.Error -> alert(Alert.AlertType.ERROR, messages["error.title"], it.result.error.localizedMessage)
                 else -> viewModel.status = messages["canceled"]
@@ -191,18 +202,21 @@ class MainLeftView : View(messages["panel.title"]) {
                     }
                 }
 
-                linechart(null, CategoryAxis(), NumberAxis()) {
-                    maxWidth = 500.0
-                    minWidth = 500.0
-                    minHeight = 300.0
-                    maxHeight = 300.0
-                    isLegendVisible = false
-                    series("X axis") {
-                        data("one", 150)
-                        data("two", 250)
-                        data("three", 80)
-                    }
-                }
+                add(chart)
+
+//                linechart(null, CategoryAxis(), NumberAxis()) {
+//                    id = "chart"
+//                    maxWidth = 500.0
+//                    minWidth = 500.0
+//                    minHeight = 300.0
+//                    maxHeight = 300.0
+//                    isLegendVisible = true
+//                    series("Population") {
+//                        data("MAR", 80)
+//                        data("APR", 100)
+//                        data("MAY", 15038)
+//                    }
+//                }
             }
 
             separator(Orientation.VERTICAL) {

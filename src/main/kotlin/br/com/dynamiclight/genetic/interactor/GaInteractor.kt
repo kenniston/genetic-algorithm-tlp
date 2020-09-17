@@ -117,6 +117,9 @@ class GaInteractor : Component(), ScopedInstance {
         if (data.tournament > data.individuals.size) return GAResult.Error(Exception(messages["error.tournament.size"]))
         if (data.tournament < 2) return GAResult.Error(Exception(messages["error.tournament.minimum.size"]))
 
+        // Evolutions
+        evolutionCount += 1
+        
         // Random numbers
         val rnd = Random(System.currentTimeMillis())
 
@@ -137,6 +140,8 @@ class GaInteractor : Component(), ScopedInstance {
             // Tournament
             val father1 = tournament()
             val father2 = tournament()
+
+            if (father1 == father2) continue
 
             // Crossover
             if (rnd.nextDouble() <= data.crossoverRate) {
@@ -171,9 +176,6 @@ class GaInteractor : Component(), ScopedInstance {
 
         // Best Individual
         val best = getBestIndividual(data.individuals)
-
-        // Evolutions
-        evolutionCount += 1
 
         return GAResult.Success(Triple(evolutionCount, populationFitnessAverage(), best))
     }
@@ -248,11 +250,8 @@ class GaInteractor : Component(), ScopedInstance {
         var rnd = (0 until data.individuals.size).shuffled()
         for (index in 0 until data.tournament) {
             val competitor = data.individuals[rnd[index]]
-
             //println("\tCompetidor: $competitor")
-
             winner = if (competitor.fitness < winner.fitness) competitor else winner
-            winner.fitness = calculateIndividualFitness(winner.chromosome)
         }
         return winner
     }

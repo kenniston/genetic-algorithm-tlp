@@ -2,15 +2,16 @@ package br.com.dynamiclight.genetic.viewmodel
 
 import br.com.dynamiclight.genetic.domain.GAResult
 import br.com.dynamiclight.genetic.domain.GaModel
-import br.com.dynamiclight.genetic.domain.Individual
 import br.com.dynamiclight.genetic.interactor.GaInteractor
 import br.com.dynamiclight.genetic.view.UpdateGARequest
 import javafx.beans.property.DoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.scene.chart.XYChart.Series
 import javafx.scene.shape.Circle
 import tornadofx.*
 import java.io.File
+
 
 class GaViewModel : ItemViewModel<GaModel>() {
     private val interactor: GaInteractor by inject()
@@ -36,6 +37,8 @@ class GaViewModel : ItemViewModel<GaModel>() {
     val citiesProperty = SimpleStringProperty("")
     var cities: String by citiesProperty
 
+    var chartSerie = Series<Double, Int>()
+
     var running = false
 
     init {
@@ -58,9 +61,10 @@ class GaViewModel : ItemViewModel<GaModel>() {
     }
 
     fun run() {
-        for (count in 0..item.evolutions) {
+        for (count in 0 until item.evolutions) {
             val evo = interactor.executeGA()
             fire(UpdateGARequest(evo))
+            if (evo is GAResult.Error) break
         }
     }
 
